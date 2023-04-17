@@ -7,8 +7,6 @@
   if (!empty($_GET['action'])) {
     $action = $_GET['action'];
   }
-
-  dump($action);
 ?>
 
 <html>
