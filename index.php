@@ -38,19 +38,6 @@
       $page = 'list';
       $ViewPages['actionList'] = 'wyświetlam listę';
       break;
-
-
-
-
-
-
-
-
-  }
-
-
-  if ($action === 'create') {
-  } else {
   }
 
   $view->render($action, $ViewPages);
