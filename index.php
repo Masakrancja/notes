@@ -1,16 +1,59 @@
 <?php
   declare(strict_types=1);
   namespace App;
-  require_once('src/Utils/debug.php');
+  error_reporting(E_ALL);
+  ini_set('display_errors', '1');
 
-  $action = null;
-  if (!empty($_GET['action'])) {
-    $action = htmlentities($_GET['action']);
+  require_once('src/Utils/debug.php');
+  require_once('src/View.php');
+
+  $view = new View();
+
+  const DEFAULT_ACTION = 'list';
+  $ViewPages = [];
+  $action = htmlentities($_GET['action'] ?? DEFAULT_ACTION);
+
+  switch($action)
+  {
+    case 'create':
+      $page = 'create';
+      $created = false;
+      if ($_POST) {
+        $ViewPages = [
+          'title' => $_POST['title'],
+          'description' => $_POST['description']
+        ];
+        $created = true;
+      }
+      $ViewPages['created'] = $created;
+      break;
+
+    case 'show':
+      $page = 'show';
+      $ViewPages['title'] = 'Title';
+      $ViewPages['description'] = 'Description';
+      break;
+
+    default:
+      $page = 'list';
+      $ViewPages['actionList'] = 'wyświetlam listę';
+      break;
+
+
+
+
+
+
+
+
   }
+
 
   if ($action === 'create') {
-    include_once('templates/pages/create.php');
   } else {
-    include_once('templates/pages/list.php');
   }
+
+  $view->render($action, $ViewPages);
+
+
 
