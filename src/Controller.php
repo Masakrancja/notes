@@ -3,35 +3,33 @@
 declare(strict_types=1);
 namespace App;
 
-require_once('View.php');
+require_once('src/View.php');
 
 class Controller
 {
     private const DEFAULT_ACTION = 'list';
-    private array $getData;
-    private array $postData;
+    private array $request;
+    private View $view;
 
-    public function __construct(array $getData, array $postData)
+    public function __construct(array $request)
     {
-        $this->getData = $getData;
-        $this->postData = $postData;   
+        $this->request = $request;
+        $this->view = new View();
     }
 
     public function run()
     {
-        $action = htmlentities($this->getData['action'] ?? self::DEFAULT_ACTION);
-        $view = new View();
         $ViewPages = [];
-
-        switch($action)
+        switch($this->action())
         {
             case 'create':
             $page = 'create';
             $created = false;
-            if ($this->postData) {
+            $data = $this->getDataPost();
+            if ($data) {
                 $ViewPages = [
-                'title' => $this->postData['title'],
-                'description' => $this->postData['description']
+                'title' => $data['title'],
+                'description' => $data['description']
                 ];
                 $created = true;
             }
@@ -49,6 +47,23 @@ class Controller
             $ViewPages['actionList'] = 'wyświetlam listę';
             break;
         }
-        $view->render($action, $ViewPages);
+        $this->view->render($page, $ViewPages);
     }
+
+    private function getDataGet() : array
+    {
+        return $this->request['get'] ?? [];
+    }
+
+    private function getDataPost() : array
+    {
+        return $this->request['post'] ?? [];
+    }
+
+    private function action() : string
+    {
+        $data = $this->getDataGet();
+        return $data['action'] ?? self::DEFAULT_ACTION;
+    }
+
 }
