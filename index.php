@@ -15,6 +15,7 @@
 
   //$controller = new Controller($request);
   //$controller->run();
+  $configuration = require_once('config/config.php');
 
   (new Controller($request))->run();
 
