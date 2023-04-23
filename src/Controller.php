@@ -3,8 +3,11 @@
 declare(strict_types=1);
 namespace App;
 
+use App\Exception\ConfigurationException;
+
 require_once('Database.php');
 require_once('View.php');
+require_once('src/Exception/ConfigurationException.php');
 
 
 class Controller
@@ -13,6 +16,7 @@ class Controller
     private const DEFAULT_ACTION = 'list';
     private array $request;
     private View $view;
+    private Database $database;
 
     public static function initConfiguration(array $configuration) : void
     {
@@ -21,10 +25,12 @@ class Controller
 
     public function __construct(array $request)
     {
-        $db = new Database(self::$configuration['db']);
+        if (empty(self::$configuration['db'])) {
+            throw new ConfigurationException('Configuration Error');
+        }
+        $this->database = new Database(self::$configuration['db']);
         $this->request = $request;
         $this->view = new View();
-        
     }
 
     public function run()
@@ -33,28 +39,25 @@ class Controller
         switch($this->action())
         {
             case 'create':
-            $page = 'create';
-            $created = false;
-            $data = $this->getDataPost();
-            if ($data) {
-                $ViewPages = [
-                'title' => $data['title'],
-                'description' => $data['description']
-                ];
-                $created = true;
-            }
-            $ViewPages['created'] = $created;
+                $page = 'create';
+                $data = $this->getDataPost();
+                if ($data) {
+                    $noteData = ['title' => $data['title'], 'description' => $data['description']];
+                    $this->database->createNote($noteData);
+                    header('Location: /?before=create');
+                }
             break;
 
             case 'show':
-            $page = 'show';
-            $ViewPages['title'] = 'Title';
-            $ViewPages['description'] = 'Description';
+                $page = 'show';
+                $ViewPages['title'] = 'Title';
+                $ViewPages['description'] = 'Description';
             break;
 
             default:
-            $page = 'list';
-            $ViewPages['actionList'] = 'wyświetlam listę';
+                $page = 'list';
+                $data = $this->getDataGet();
+                $ViewPages['before'] = $data['before'] ?? null;
             break;
         }
         $this->view->render($page, $ViewPages);
