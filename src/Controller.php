@@ -9,7 +9,6 @@ require_once('Database.php');
 require_once('View.php');
 require_once('src/Exception/ConfigurationException.php');
 
-
 class Controller
 {
     private static array $configuration = [];
@@ -57,8 +56,11 @@ class Controller
             default:
                 $page = 'list';
                 $data = $this->getDataGet();
-                $ViewPages['before'] = $data['before'] ?? null;
-            break;
+                $ViewPages = [
+                    'before' => $data['before'] ?? null,
+                    'notes' => $this->database->getNotes()
+                ];
+                break;
         }
         $this->view->render($page, $ViewPages);
     }

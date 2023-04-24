@@ -57,4 +57,15 @@ class Database
         }
     }
 
+    public function getNotes(): array
+    {
+        try {
+            $sql = "SELECT id, title, created FROM notes";
+            $result = $this->conn->query($sql, PDO::FETCH_ASSOC);
+            return $result->fetchAll();        
+        } catch (Throwable $e) {
+            throw new StorageException('Nie udało się pobrać notatek', 400);
+        }
+    }
+
 }

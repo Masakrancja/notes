@@ -3,15 +3,16 @@
   namespace App;
 
   use App\Exception\AppException;
-use App\Exception\ConfigurationException;
-use Throwable;
+  use App\Exception\ConfigurationException;
+  use Throwable;
 
   error_reporting(E_ALL);
   ini_set('display_errors', '1');
 
   require_once('src/Utils/debug.php');
   require_once('src/Controller.php');
-  #require_once('src/Exception/AppException.php');
+  require_once('src/Exception/AppException.php');
+  $configuration = require_once('config/config.php');
 
   $request = [
     'get' => $_GET,
@@ -21,7 +22,7 @@ use Throwable;
   try {
     //$controller = new Controller($request);
     //$controller->run();
-    $configuration = require_once('config/config.php');
+
     Controller::initConfiguration($configuration);
     (new Controller($request))->run();
   } catch (ConfigurationException $e) {
