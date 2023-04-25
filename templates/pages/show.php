@@ -9,6 +9,6 @@
         <div>Brak notatki do wyświetlenia</div>
     <?php endif; ?>
     <a href="/">
-        <button>Powrót do listy notatek</button>
+        <button>Powrót do listy notatek </button>
     </a>
 </div>
