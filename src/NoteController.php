@@ -3,38 +3,12 @@
 declare(strict_types=1);
 namespace App;
 
-require_once('Database.php');
-require_once('View.php');
-require_once('src/Exception/ConfigurationException.php');
+require_once('AbstractController.php');
 require_once('src/Exception/NotFoundException.php');
 
-use App\Exception\ConfigurationException;
 use App\Exception\NotFoundException;
-
-
-class Controller
+class NoteController extends AbstractController
 {
-    private static array $configuration = [];
-    private const DEFAULT_ACTION = 'list';
-    private Request $request;
-    private View $view;
-    private Database $database;
-
-    public static function initConfiguration(array $configuration) : void
-    {
-        self::$configuration = $configuration;
-    }
-
-    public function __construct(Request $request)
-    {
-        if (empty(self::$configuration['db'])) {
-            throw new ConfigurationException('Configuration Error');
-        }
-        $this->database = new Database(self::$configuration['db']);
-        $this->request = $request;
-        $this->view = new View();
-    }
-
     public function createAction()
     {
         if ($this->request->hasPost()) {
@@ -78,20 +52,4 @@ class Controller
             ]
         );
     }
-
-
-    public function run()
-    {
-        $action = $this->action() . 'Action';
-        if (!method_exists($this, $action)) {
-            $action = self::DEFAULT_ACTION . 'Action';
-        }
-        $this->$action();
-    }
-
-    private function action() : string
-    {
-        return $this->request->getParam('action', self::DEFAULT_ACTION);
-    }
-
 }

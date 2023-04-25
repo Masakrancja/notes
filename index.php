@@ -6,7 +6,7 @@
   ini_set('display_errors', '1');
 
   require_once('src/Utils/debug.php');
-  require_once('src/Controller.php');
+  require_once('src/NoteController.php');
   require_once('src/Request.php');
   require_once('src/Exception/AppException.php');
   $configuration = require_once('config/config.php');
@@ -21,8 +21,8 @@
     //$controller = new Controller($request);
     //$controller->run();
 
-    Controller::initConfiguration($configuration);
-    (new Controller($request))->run();
+    AbstractController::initConfiguration($configuration);
+    (new NoteController($request))->run();
   } catch (ConfigurationException $e) {
     echo '<h3>Błąd konfiguracji. Skontaktuj się z administratorem</h3>';
   } catch (AppException $e) {
