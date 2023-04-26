@@ -8,6 +8,9 @@
     <?php else: ?>
         <div>Brak notatki do wyświetlenia</div>
     <?php endif; ?>
+    <a href="/?action=edit&id=<?php echo $note['id']; ?>">
+        <button>Edycja</button>
+    </a>
     <a href="/">
         <button>Powrót do listy notatek </button>
     </a>
