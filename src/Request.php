@@ -7,11 +7,23 @@ class Request
 {
     private array $get = [];
     private array $post = [];
+    private array $serwer = [];
 
-    public function __construct(array $get, array $post)
+    public function __construct(array $get, array $post, array $serwer)
     {
         $this->get = $get;
         $this->post = $post;
+        $this->serwer = $serwer;
+    }
+    
+    public function isGet(): bool
+    {
+        return $this->serwer['REQUEST_METHOD'] === 'GET';
+    }
+
+    public function isPost(): bool
+    {
+        return $this->serwer['REQUEST_METHOD'] === 'POST';
     }
 
     public function getParam(string $name, $default = null)

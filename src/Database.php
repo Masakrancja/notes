@@ -6,6 +6,7 @@ namespace App;
 
 use App\Exception\StorageException;
 use App\Exception\NotFoundException;
+use App\Exception\ConfigurationException;
 use PDO;
 use PDOException;
 use Throwable;
@@ -27,7 +28,7 @@ class Database
     private function validateConfig(array $config): void
     {
         if (empty($config['database']) || empty($config['host']) || empty($config['user']) || empty($config['password'])) {
-            throw new StorageException('Configuration Error');
+            throw new ConfigurationException('Configuration Error');
         }
     }
 
@@ -82,6 +83,18 @@ class Database
             throw new NotFoundException('Notatka o id: ' . $id . ' nie została znaleziona', 400);
         }
         return $note;
+    }
+
+    public function editNote(int $id, array $data): void
+    {
+        try {
+            $title = $this->conn->quote($data['title']);
+            $description = $this->conn->quote($data['description']);
+            $sql = "UPDATE notes SET title=" . $title . ", description=" . $description . " WHERE id=" . $id;
+            $this->conn->exec($sql);
+        } catch (Throwable $e) {
+            throw new StorageException('Błąd aktualizacji notatki', 400, $e);
+        }
     }
 
 }

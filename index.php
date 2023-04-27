@@ -1,13 +1,12 @@
 <?php
   declare(strict_types=1);
-  namespace App;
 
   error_reporting(E_ALL);
   ini_set('display_errors', '1');
 
-  spl_autoload_register(function($name){
-    $path = __DIR__ .'\\src' . $name . '.php';
-    $path = str_replace(['\\', __NAMESPACE__], ['/', ''], $path);
+  spl_autoload_register(function (string $classNamespace) {
+    $path = str_replace(['\\', 'App/'], ['/', ''], $classNamespace);
+    $path = "src/$path.php";
     require_once($path);
   });
 
@@ -19,8 +18,7 @@
   use App\Controller\NoteController;
   use App\Exception\AppException;
   use App\Exception\ConfigurationException;
-  use Throwable;
-  $request = new Request($_GET, $_POST);
+  $request = new Request($_GET, $_POST, $_SERVER);
 
   try {
     //$controller = new Controller($request);
@@ -32,7 +30,7 @@
     echo '<h3>Błąd konfiguracji. Skontaktuj się z administratorem</h3>';
   } catch (AppException $e) {
     echo '<h3>' . $e->getMessage() . '</h3>';
-  } catch (Throwable $e) {
+  } catch (\Throwable $e) {
     dump($e);
     echo '<h1>Application Error</h1>';
   }
