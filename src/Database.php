@@ -58,10 +58,17 @@ class Database
         }
     }
 
-    public function getNotes(): array
+    public function getNotes(string $orderBy, string $sortOrder): array
     {
         try {
-            $sql = "SELECT id, title, created FROM notes";
+            if (!in_array($orderBy, ['title', 'created'])) {
+                $orderBy = 'title';
+            }
+            if (!in_array($sortOrder, ['asc', 'desc'])) {
+                $sortOrder = 'desc';
+            }
+
+            $sql = "SELECT id, title, created FROM notes ORDER BY " . $orderBy . " " . $sortOrder;
             $result = $this->conn->query($sql, PDO::FETCH_ASSOC);
             return $result->fetchAll();        
         } catch (Throwable $e) {
@@ -94,6 +101,16 @@ class Database
             $this->conn->exec($sql);
         } catch (Throwable $e) {
             throw new StorageException('Błąd aktualizacji notatki', 400, $e);
+        }
+    }
+
+    public function deleteNote(int $id): void
+    {
+        try {
+            $sql = "DELETE FROM notes WHERE id = " . $id . " LIMIT 1";
+            $this->conn->exec($sql);
+        } catch (Throwable $e) {
+            throw new StorageException('Błąd usunięcia notatki', 400, $e);
         }
     }
 

@@ -14,6 +14,29 @@
       }
       ?>
     </div>
+
+    <?php
+      $sort = $params['sort'] ?? [];
+      $by = $sort['by'] ?? 'title';
+      $order = $sort['order'] ?? 'desc';
+    ?>
+
+    <div class="settings-form">
+      <form action="/" method="GET">
+        <div>Sortuj po:</div>
+        <div>
+          <label>Tytule <input type="radio" name="sortby" value="title" <?php echo $by === 'title' ? 'checked' : ''; ?>/></label>
+          <label>Dacie <input type="radio" name="sortby" value="created" <?php echo $by === 'created' ? 'checked' : ''; ?>/></label>
+        </div>
+        <div>Kolejność sortowania</div>
+        <div>
+          <label>Rosnąca <input type="radio" name="sortorder" value="asc" <?php echo $order === 'asc' ? 'checked' : ''; ?>/></label>
+          <label>Malejąca <input type="radio" name="sortorder" value="desc" <?php echo $order === 'desc' ? 'checked' : ''; ?>/></label>
+        </div>
+        <input type="submit" value="Wybierz">
+      </form>
+    </div>
+
     <div class="message">
       <?php
       if (!empty($params['before'])) {
@@ -23,6 +46,9 @@
             break;
           case 'edited':
             echo 'Notatka została zaktualizowana';
+            break;
+          case 'deleted':
+            echo 'Notatka została usunięta';
             break;
         }
       }
@@ -52,6 +78,9 @@
               <td>
                 <a href="/?action=show&id=<?php echo $note['id'] ?>">
                   <button>Szczegóły</button>
+                </a>
+                <a href="/?action=delete&id=<?php echo $note['id'] ?>">
+                  <button>Usuń</button>
                 </a>
               </td>
             </tr>

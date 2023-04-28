@@ -31,7 +31,7 @@ abstract class AbstractController
         $this->view = new View();
     }
 
-    public function run()
+    final public function run()
     {
         $action = $this->action() . 'Action';
         if (!method_exists($this, $action)) {
@@ -40,10 +40,10 @@ abstract class AbstractController
         $this->$action();
     }
 
-    protected function redirect(string $to, array $params): void
+    final protected function redirect(string $to, array $params): void
     {
         $location = $to;
-        if (count($param)) {
+        if (count($params)) {
             $queryParams = [];
             foreach ($params as $key => $value) {
                 $queryParams[] = urlencode($key) . '=' . urlencode($value);
