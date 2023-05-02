@@ -58,8 +58,10 @@ class Database
         }
     }
 
-    public function getNotes(string $orderBy, string $sortOrder): array
+    public function getNotes(int $pageNumber, int $pageSize, string $orderBy, string $sortOrder, ?string $phrase): array
     {
+        $limit = $pageSize;
+        $offset = $pageSize * ($pageNumber - 1);
         try {
             if (!in_array($orderBy, ['title', 'created'])) {
                 $orderBy = 'title';
@@ -67,8 +69,12 @@ class Database
             if (!in_array($sortOrder, ['asc', 'desc'])) {
                 $sortOrder = 'desc';
             }
-
-            $sql = "SELECT id, title, created FROM notes ORDER BY " . $orderBy . " " . $sortOrder;
+            if ($phrase) {
+                $phrase = $this->conn->quote('%' . $phrase . '%', PDO::PARAM_STR);
+                $sql = "SELECT id, title, created FROM notes WHERE title LIKE (" . $phrase . ") ORDER BY " . $orderBy . " " . $sortOrder . " LIMIT " . $offset . ", " . $limit;
+            } else {
+                $sql = "SELECT id, title, created FROM notes ORDER BY " . $orderBy . " " . $sortOrder . " LIMIT " . $offset . ", " . $limit;
+            }
             $result = $this->conn->query($sql, PDO::FETCH_ASSOC);
             return $result->fetchAll();        
         } catch (Throwable $e) {
@@ -76,6 +82,36 @@ class Database
         }
     }
 
+    public function getCount(): int
+    {
+        try {
+            $sql = "SELECT COUNT(*) AS c FROM notes";
+            $query = $this->conn->query($sql, PDO::FETCH_ASSOC);
+            $result = $query->fetch();
+            if (!$result) {
+                throw new StorageException('Błąd pobrania ilości notatek', 400);
+            }
+            return $result['c'];
+        } catch (Throwable $e) {
+            throw new StorageException('Błąd pobrania ilości notatek', 400, $e);
+        } 
+    }
+
+    public function getSearchCount(string $phrase): int
+    {
+        try {
+            $phrase = $this->conn->quote('%' . $phrase . '%', PDO::PARAM_STR);
+            $sql = "SELECT COUNT(*) AS c FROM notes WHERE title LIKE " . $phrase;
+            $query = $this->conn->query($sql, PDO::FETCH_ASSOC);
+            $result = $query->fetch();
+            if (!$result) {
+                throw new StorageException('Błąd pobrania ilości notatek', 400);
+            }
+            return $result['c'];
+        } catch (Throwable $e) {
+            throw new StorageException('Błąd pobrania ilości notatek', 400, $e);
+        }
+    }
 
     public function getNote(int $id): array
     {

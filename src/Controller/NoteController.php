@@ -6,6 +6,8 @@ namespace App\Controller;
 use App\Exception\NotFoundException;
 class NoteController extends AbstractController
 {
+
+    private const DEFAULT_PAGE_SIZE = 10;
     public function createAction(): void
     {
         if ($this->request->hasPost()) {
@@ -30,11 +32,33 @@ class NoteController extends AbstractController
 
     public function listAction(): void
     {
+        $pageSize = (int) $this->request->getParam('size', self::DEFAULT_PAGE_SIZE);
+        $pageNumber = (int) $this->request->getParam('page', 1);
         $orderBy = $this->request->getParam('sortby', 'title');
         $sortOrder = $this->request->getParam('sortorder', 'desc');
+        $phrase = $this->request->getParam('phrase');
+
+        if (!in_array($pageSize, [1, 5, 10, 25])) {
+            $pageSize = self::DEFAULT_PAGE_SIZE;
+        }
+
+        $note = $this->database->getNotes($pageNumber, $pageSize, $orderBy, $sortOrder, $phrase);
+        if ($phrase) {
+            $pages = (int) ceil($this->database->getSearchCount($phrase) / $pageSize);
+        } else {
+            $pages = (int) ceil($this->database->getCount() / $pageSize);
+        }
+
         $this->view->render(
             'list', 
             [
+                'paging' =>
+                    [
+                        'size' => $pageSize,
+                        'page' => $pageNumber,
+                        'pages' => $pages,
+                        'phrase' => $phrase
+                    ],
                 'sort' => 
                     [
                         'by' => $orderBy,
@@ -42,7 +66,7 @@ class NoteController extends AbstractController
                     ],
                 'before' => $this->request->getParam('before'),
                 'error' => $this->request->getParam('error'),
-                'notes' => $this->database->getNotes($orderBy, $sortOrder)
+                'notes' => $note
             ]
         );
     }

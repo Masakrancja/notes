@@ -13,10 +13,17 @@
         {
             $result = [];
             foreach ($params as $key => $param) {
-                if (is_array($param)) {
-                    $result[$key] = $this->escape($param);
-                } else {
-                    $result[$key] = htmlentities((string) $param ?? '');
+
+                switch(true) {
+                    case (is_array($param)):
+                        $result[$key] = $this->escape($param);
+                        break;
+                    case (is_int($param)):
+                        $result[$key] = $param;
+                        break;
+                    default:
+                        $result[$key] = htmlentities((string) $param ?? '');
+                        break;
                 }
             }
             return $result;
