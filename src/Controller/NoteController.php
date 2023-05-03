@@ -3,10 +3,8 @@
 declare(strict_types=1);
 namespace App\Controller;
 
-use App\Exception\NotFoundException;
-class NoteController extends AbstractController
+class NoteController extends AbstractController 
 {
-
     private const DEFAULT_PAGE_SIZE = 10;
     public function createAction(): void
     {
@@ -16,7 +14,7 @@ class NoteController extends AbstractController
                     'title' => $this->request->postParam('title'), 
                     'description' => $this->request->postParam('description')
                 ];
-            $this->database->createNote($noteData);
+            $this->noteModel->create($noteData);
             $this->redirect('/', ['before' => 'create']);
         }
         $this->view->render('create');
@@ -42,11 +40,12 @@ class NoteController extends AbstractController
             $pageSize = self::DEFAULT_PAGE_SIZE;
         }
 
-        $note = $this->database->getNotes($pageNumber, $pageSize, $orderBy, $sortOrder, $phrase);
         if ($phrase) {
-            $pages = (int) ceil($this->database->getSearchCount($phrase) / $pageSize);
+            $note = $this->noteModel->search($pageNumber, $pageSize, $orderBy, $sortOrder, $phrase);
+            $pages = (int) ceil($this->noteModel->searchCount($phrase) / $pageSize);
         } else {
-            $pages = (int) ceil($this->database->getCount() / $pageSize);
+            $note = $this->noteModel->list($pageNumber, $pageSize, $orderBy, $sortOrder);
+            $pages = (int) ceil($this->noteModel->count() / $pageSize);
         }
 
         $this->view->render(
@@ -79,7 +78,7 @@ class NoteController extends AbstractController
                 'title' => $this->request->postParam('title'), 
                 'description' => $this->request->postParam('description')
             ];
-            $this->database->editNote($noteId, $noteData);
+            $this->noteModel->edit($noteId, $noteData);
             $this->redirect('/', ['before' => 'edited']);
         }
         $this->view->render('edit', ['note' => $this->getNote()]);
@@ -89,7 +88,7 @@ class NoteController extends AbstractController
     {
         if ($this->request->isPost()) {
             $noteId = (int) $this->request->postParam('id');
-            $this->database->deleteNote($noteId);
+            $this->noteModel->delete($noteId);
             $this->redirect('/', ['before' => 'deleted']);
         }
         $note = $this->getNote();
@@ -102,11 +101,7 @@ class NoteController extends AbstractController
         if (!$noteId) {
             $this->redirect('/', ['error', 'noteNotFound']);
         }
-        try {
-            return $this->database->getNote($noteId);
-        } catch (NotFoundException $e) {
-            $this->redirect('/', ['error', 'noteNotFound']);
-        }
+        return $this->noteModel->get($noteId);
     }
 
 }

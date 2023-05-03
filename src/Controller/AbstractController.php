@@ -5,7 +5,9 @@ declare(strict_types=1);
 namespace App\Controller;
 use App\Exception\ConfigurationException;
 use App\Request;
-use App\Database;
+use App\Model\NoteModel;
+use App\Exception\NotFoundException;
+use App\Exception\StorageException;
 use App\View;
 
 abstract class AbstractController
@@ -14,7 +16,7 @@ abstract class AbstractController
     protected const DEFAULT_ACTION = 'list';
     protected Request $request;
     protected View $view;
-    protected Database $database;
+    protected NoteModel $noteModel;
 
     public static function initConfiguration(array $configuration) : void
     {
@@ -26,18 +28,24 @@ abstract class AbstractController
         if (empty(self::$configuration['db'])) {
             throw new ConfigurationException('Configuration Error');
         }
-        $this->database = new Database(self::$configuration['db']);
+        $this->noteModel = new NoteModel(self::$configuration['db']);
         $this->request = $request;
         $this->view = new View();
     }
 
     final public function run()
     {
-        $action = $this->action() . 'Action';
-        if (!method_exists($this, $action)) {
-            $action = self::DEFAULT_ACTION . 'Action';
+        try {
+            $action = $this->action() . 'Action';
+            if (!method_exists($this, $action)) {
+                $action = self::DEFAULT_ACTION . 'Action';
+            }
+            $this->$action();
+        } catch (StorageException $e) {
+            $this->view->render('error', ['message' => $e->getMessage()]);
+        } catch (NotFoundException $e) {
+            $this->redirect('/', ['error', 'noteNotFound']);
         }
-        $this->$action();
     }
 
     final protected function redirect(string $to, array $params): void
